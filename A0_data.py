@@ -34,5 +34,7 @@ def clean_data(data):
                       'Festival',
                       'City']
     data[col_remove_space]=data[col_remove_space].apply(lambda x: x.str.strip())
+    data['Deliver_time']=(data['Time_taken(min)']   .map(lambda x:x.replace('(min) ',''))
+                                                    .map(lambda x:int(x)))
     #display(data.dtypes)
     return data
