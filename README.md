@@ -1,22 +1,10 @@
-# CDS_python
-exercicios de python em um case
+# Curry Company
+
+Projeto de portfólio, praticado análise de dados e data viz usando python.
+
+## Market Place
+
+Empresa fictícia de alimento que reúne clientes entregadores e restaurantes. 
+O executivo precisa de um dashboard para acompanhar as principais métricas da empresa.
 
 
-
-# organização
-
-## aula 27 
-
-Baixar os dados train.csv
-
-## aula 28
-
-Limpar dados
-
-## aula 30
-
-Perguntas
-
-## aula 34
-
-Perguntas
