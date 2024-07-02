@@ -15,6 +15,11 @@ import plotly.express as px
 #========================================
 import streamlit as st
 
+st.set_page_config(
+    page_title='Visão Negócio',
+    page_icon="📈",
+    layout='wide'
+)
 #========================================
 #Barra Lateral
 #========================================
@@ -41,6 +46,7 @@ st.sidebar.markdown("""---""")
 #========================================
 #Header
 #========================================
+
 st.header('Market Place - Visão Empresa')
 
 filtro_linhas=((data['Order_Date']<date_slider)&

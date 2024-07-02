@@ -15,6 +15,12 @@ import plotly.express as px
 #========================================
 import streamlit as st
 
+st.set_page_config(
+    page_title='Visão Restaurantes',
+    page_icon="🍽️",
+    layout='wide'
+)
+
 #========================================
 #Barra Lateral
 #========================================
@@ -65,7 +71,8 @@ v_gerencial,v_tatica,v_geografica=st.tabs(['Vistão Gerencial',
 #========================================
 with v_gerencial:
 
-    with st.container():
+    with st.container(): #metricas gerais
+        st.markdown('## Métricas gerais')
         c1,c2,c3,c4,c5,c6=st.columns(6)
 
         with c1:
@@ -81,23 +88,31 @@ with v_gerencial:
                 data['distancia']=data.apply(calc_distancia,axis=1)
                 return data['distancia'].mean()
             distancia_media=calc_distancia_media(data)
-            st.metric('Distancia Média',distancia_media)
+
+            st.metric('Distancia Média',round(distancia_media,2))
         with c3:
             mean_delivery_time=data[data['Festival']=='Yes']['Deliver_time'].mean().round(2)
-            st.metric('Tempo médio c/Festival',mean_delivery_time)
+            st.metric('Tempo c/Fest.',mean_delivery_time)
         with c4:
             std_delivery_time=data[data['Festival']=='Yes']['Deliver_time'].std().round(2)
-            st.metric('Desvio Tempo c/Festival  ',std_delivery_time)
+            st.metric('Std temp. c/Fest',std_delivery_time)
         with c5:
             mean_delivery_time=data[data['Festival']=='No']['Deliver_time'].mean().round(2)
-            st.metric('Tempo médio s/Festival',mean_delivery_time)
+            st.metric('Tempo s/Fest',mean_delivery_time)
         with c6:
             std_delivery_time=data[data['Festival']=='No']['Deliver_time'].std().round(2)
-            st.metric('Desvio Tempo s/Festival  ',std_delivery_time)
+            st.metric('Std Temp. s/Fest',std_delivery_time)
     st.markdown('---')
 
     with st.container():
-        st.markdown('distancia media por cidade')
+        st.markdown('### Tempo médio de entrega por cidade')
+        def pieGraph_tempo_medio_cidade(data):
+            from plotly import express as py
+            df_aux=data.groupby(['City'])['Deliver_time'].mean().reset_index()
+            fig=py.pie(data_frame=df_aux,names='City',values='Deliver_time')
+            return fig
+
+        st.plotly_chart(pieGraph_tempo_medio_cidade(data),use_container_width=True)
 
     st.markdown('---')
 
@@ -106,23 +121,56 @@ with v_gerencial:
         c1,c2=st.columns(2)
 
         with c1:
-            st.markdown('distribuição do tempo por cidade')
-            def tempo_medio_cidade():
-                #tempo de entrega médio por cidade
-                st.markdown('## Tempo médio de entrega por cidade')
+            st.markdown('### Distribuição do tempo por cidade')
+            def barGraph_tempo_por_cidade(dados):
+                data=dados
+                colunas=['City','Deliver_time']
+                df=data[colunas]
+                df=df.groupby(['City']).agg({'Deliver_time':['mean','std']}).reset_index()
+                df.columns=['City','avg_time','std_time']
 
-                from plotly import express as py
-                df_aux=data.groupby(['City'])['Deliver_time'].mean().reset_index()
-
-                fig=py.pie(data_frame=df_aux,names='City',values='Deliver_time')
-                st.plotly_chart(fig,use_container_width=True)
-            tempo_medio_cidade()
+                import plotly.express as px
+                
+                fig = px.bar(
+                    df, 
+                    x='City', 
+                    y='avg_time', 
+                    error_y='std_time', 
+                    title='',
+                    labels={'City': 'City', 'avg_time': ''}
+                )
+                return fig
+            st.plotly_chart(barGraph_tempo_por_cidade(dados=data),use_container_width=True)
+        
         with c2:
-            st.markdown('Tempo médio por tipo de entrega')
+            st.markdown('### Tempo médio por tipo de entrega')
+
+            def table_city_orderType_time(data):
+                df=data.copy()
+                df=df.groupby(['City','Type_of_order']).agg({'Deliver_time':['mean','std']})
+                df.columns=['mean_time','std_time']
+                df=df.reset_index()
+                return df
+            st.dataframe(table_city_orderType_time(data),hide_index=True)
     st.markdown('---')
 
     with st.container():
-        st.markdown('Tempo médio por cidade e trafego')
+        st.markdown('### Tempo médio por cidade e trafego')
+
+        def pieGraph_city_traffic_time(dados):
+            df=dados.copy()
+            colunas=['City','Deliver_time','Road_traffic_density']
+            df=df[colunas]
+            df=df.groupby(['City','Road_traffic_density']).agg({'Deliver_time':['mean','std']})
+            df.columns=['mean_time','std_time']
+            df=df.reset_index().fillna(0)
+            from plotly import express as px
+            fig=px.sunburst(df,path=['City','Road_traffic_density'],
+                            values='mean_time',color='std_time',
+                            color_continuous_scale='RdBu',
+                            )
+            return fig
+        st.plotly_chart(pieGraph_city_traffic_time(data),use_container_width=True)
             
             
     st.markdown("---")

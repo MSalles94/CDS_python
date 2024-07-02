@@ -14,6 +14,11 @@ import plotly.express as px
 #layout
 #========================================
 import streamlit as st
+st.set_page_config(
+    page_title='Visão Entregadores',
+    page_icon="🚚",
+    layout='wide'
+)
 
 #========================================
 #Barra Lateral
@@ -66,7 +71,8 @@ v_gerencial,v_tatica,v_geografica=st.tabs(['Vistão Gerencial',
 with v_gerencial:
 
     with st.container():
-        st.markdown(""" # Overall Metrics""")
+        st.markdown(""" # Métricas Gerais""")
+
         vg_col1,vg_col2,vg_col3,vg_col4=st.columns(4)
         with vg_col1:
         
@@ -94,30 +100,43 @@ with v_gerencial:
         vg_col1,vg_col2=st.columns(2)
         with vg_col1:
             st.markdown('##### Avaliação média por entregador')
+
+            def avaliacao_entregador():
             
-            df_rating=(data .groupby(['Delivery_person_ID'])[['Delivery_person_Ratings']]
-                            .mean()
-                            .reset_index())
-            st.dataframe(df_rating,hide_index=True,height=550)
+                df_rating=(data .groupby(['Delivery_person_ID'])[['Delivery_person_Ratings']]
+                                .mean()
+                                .reset_index())
+                return df_rating
+            
+            st.dataframe(avaliacao_entregador(),hide_index=True,height=550)
 
         with vg_col2:
 
             with st.container():
-                st.markdown('##### Avaliação média por trânsito')
-                df_rating=(data .groupby(['Road_traffic_density'])[['Delivery_person_Ratings']]
-                                .agg(['mean', 'std'])
-                                .reset_index())
-                df_rating.columns=['Road_traffic_density','Delivery_mean','Delivery_std']
-                st.dataframe(df_rating,hide_index=True)
+                st.markdown('#### Avaliação média por trânsito')
+                
+                def avaliacao_transito():
+                    df_rating=(data .groupby(['Road_traffic_density'])[['Delivery_person_Ratings']]
+                                    .agg(['mean', 'std'])
+                                    .reset_index())
+                    df_rating.columns=['Road_traffic_density','Delivery_mean','Delivery_std']
+                    return df_rating
+                
+                st.dataframe(avaliacao_transito(),hide_index=True)
+
             st.markdown("---")
 
             with st.container():
-                st.markdown('##### Avaliação média por clima')
-                df_rating=(data .groupby(['Weatherconditions'])[['Delivery_person_Ratings']]
-                                .agg(['mean', 'std'])
-                                .reset_index())
-                df_rating.columns=['Weatherconditions','Delivery_mean','Delivery_std']
-                st.dataframe(df_rating,hide_index=True)
+                st.markdown('#### Avaliação média por clima')
+
+                def avaliacao_clima():
+                    df_rating=(data .groupby(['Weatherconditions'])[['Delivery_person_Ratings']]
+                                    .agg(['mean', 'std'])
+                                    .reset_index())
+                    df_rating.columns=['Weatherconditions','Delivery_mean','Delivery_std']   
+                    return df_rating
+                
+                st.dataframe(avaliacao_clima(),hide_index=True)
 
     st.markdown("---")
 
@@ -129,7 +148,7 @@ with v_gerencial:
         vg_col1,vg_col2=st.columns(2)
 
         with vg_col1:
-            st.markdown('Top 10 mais rápidos')
+            st.markdown('### Top 10 mais rápidos')
 
             def top10_rapidos():
                 df_x=data.copy()
@@ -143,12 +162,13 @@ with v_gerencial:
                 
                 df_x.index=df_x.index+1
                 df_x=df_x.head(10)
-                st.dataframe(df_x)
-            top10_rapidos()
+                return df_x
+            
+            st.dataframe(top10_rapidos())
             
             
         with vg_col2:
-            st.markdown('Top 10 mais lentos')
+            st.markdown('### Top 10 mais lentos')
             def top10_lentos():
                 df_x=data.copy()
                 df_x['tempo']=df_x['Time_taken(min)'].map(lambda x:float(x.replace('(min)','')))
@@ -159,8 +179,9 @@ with v_gerencial:
                             .reset_index(drop=True))
                 df_x.index=df_x.index+1
                 df_x=df_x.head(10)
-                st.dataframe(df_x)
-            top10_lentos()
+                return df_x
+            st.dataframe(top10_lentos())
+            
             
     st.markdown("---")
 #========================================
